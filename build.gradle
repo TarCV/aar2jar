@@ -5,13 +5,13 @@ plugins {
     id "com.gradle.plugin-publish" version "1.1.0"
 }
 
-group = "com.stepango.aar2jar"
+group = "com.github.TarCV"
 version = "0.6"
 
 gradlePlugin {
     plugins {
         aar2jar {
-            id = "com.stepango.aar2jar"
+            id = "com.github.TarCV.aar2jar"
             displayName = "Aar2Jar"
             description = "Transforms Aar's to Jar's"
             tags.set(["gradle", "kotlin", "android", "plugin", "jar", "aar"])
@@ -30,6 +30,6 @@ repositories {
 }
 
 gradlePlugin {
-    website = "https://github.com/stepango/aar2jar"
-    vcsUrl = "https://github.com/stepango/aar2jar.git"
+    website = "https://github.com/TarCV/aar2jar"
+    vcsUrl = "https://github.com/TarCV/aar2jar.git"
 }
