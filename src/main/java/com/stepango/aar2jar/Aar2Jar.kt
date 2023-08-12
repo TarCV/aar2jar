@@ -5,9 +5,9 @@ import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.transform.*
 import org.gradle.api.artifacts.type.ArtifactTypeDefinition
+import org.gradle.api.artifacts.type.ArtifactTypeDefinition.ARTIFACT_TYPE_ATTRIBUTE
 import org.gradle.api.file.FileSystemLocation
-import org.gradle.api.internal.artifacts.ArtifactAttributes.ARTIFACT_FORMAT
-import org.gradle.api.plugins.JavaPluginConvention
+import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
@@ -56,8 +56,8 @@ class Aar2Jar : Plugin<Project> {
 
         project.dependencies {
             registerTransform(AarToJarAction::class.java) {
-                from.attribute(ARTIFACT_FORMAT, "aar")
-                to.attribute(ARTIFACT_FORMAT, ArtifactTypeDefinition.JAR_TYPE)
+                from.attribute(ARTIFACT_TYPE_ATTRIBUTE, "aar")
+                to.attribute(ARTIFACT_TYPE_ATTRIBUTE, ArtifactTypeDefinition.JAR_TYPE)
             }
         }
 
@@ -93,10 +93,10 @@ class Aar2Jar : Plugin<Project> {
 fun Configuration.baseConfiguration(project: Project, name: String, f: SourceSet.() -> Unit) {
     isTransitive = false
     attributes {
-        attribute(ARTIFACT_FORMAT, ArtifactTypeDefinition.JAR_TYPE)
+        attribute(ARTIFACT_TYPE_ATTRIBUTE, ArtifactTypeDefinition.JAR_TYPE)
     }
     project.pluginManager.withPlugin("java") {
-        val sourceSets = project.the<JavaPluginConvention>().sourceSets
+        val sourceSets = project.the<JavaPluginExtension>().sourceSets
         sourceSets.withName(name, f)
     }
 }
