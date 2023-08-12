@@ -3,22 +3,22 @@ package com.stepango.aar2jar
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
-import org.gradle.api.artifacts.transform.ArtifactTransform
+import org.gradle.api.artifacts.transform.*
 import org.gradle.api.artifacts.type.ArtifactTypeDefinition
+import org.gradle.api.file.FileSystemLocation
 import org.gradle.api.internal.artifacts.ArtifactAttributes.ARTIFACT_FORMAT
-import org.gradle.api.plugins.JavaBasePlugin
 import org.gradle.api.plugins.JavaPluginConvention
+import org.gradle.api.provider.Provider
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.the
-import org.gradle.plugins.ide.idea.IdeaPlugin
 import org.gradle.plugins.ide.idea.model.IdeaModel
-import java.io.File
 import java.io.FileOutputStream
-import java.lang.IllegalArgumentException
 import java.util.zip.ZipFile
 
 class Aar2Jar : Plugin<Project> {
@@ -55,10 +55,9 @@ class Aar2Jar : Plugin<Project> {
         }
 
         project.dependencies {
-            registerTransform {
+            registerTransform(AarToJarAction::class.java) {
                 from.attribute(ARTIFACT_FORMAT, "aar")
                 to.attribute(ARTIFACT_FORMAT, ArtifactTypeDefinition.JAR_TYPE)
-                artifactTransform(AarToJarTransform::class.java)
             }
         }
 
@@ -106,10 +105,14 @@ fun SourceSetContainer.withName(name: String, f: SourceSet.() -> Unit) {
     this[name]?.apply { f(this) } ?: whenObjectAdded { if (this.name == name) f(this) }
 }
 
-class AarToJarTransform : ArtifactTransform() {
+abstract class AarToJarAction : TransformAction<TransformParameters.None> {
+    @get:PathSensitive(PathSensitivity.NONE)
+    @get:InputArtifact
+    abstract val inputArtifact: Provider<FileSystemLocation>
 
-    override fun transform(input: File): List<File> {
-        val file = File(outputDirectory, input.name.replace(".aar", ".jar"))
+    override fun transform(outputs: TransformOutputs) {
+        val input = inputArtifact.get().asFile
+        val file = outputs.file(input.name.replace(".aar", ".jar"))
         ZipFile(input).use { zipFile ->
             zipFile.entries()
                     .toList()
@@ -121,8 +124,5 @@ class AarToJarTransform : ArtifactTransform() {
                         }
                     }
         }
-
-        return listOf(file)
     }
-
 }
